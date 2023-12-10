@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "SteamCmdWrapper": {
+      "commandName": "Project",
+      "commandLineArgs": "\"+force_install_dir downloader_helper\" \"+login anonymous\" \"+workshop_download_item 294100 2023507013\" \"+workshop_download_item 294100 3030804445\" \"+workshop_download_item 294100 2910865748\" \"+workshop_download_item 294100 2982967973\" \"+quit\"",
+      "workingDirectory": "C:\\tools\\steamcmd\\"
+    }
+  }
+}
