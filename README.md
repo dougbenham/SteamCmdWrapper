@@ -3,7 +3,7 @@ When downloading mods for Rimworld with RimPy I would run into an issue where ex
 So if a mod author updated their mod and deleted a file, due to how RimPy and Steamcmd work, it would never be deleted for me. This tool helps solve that.
 
 # Instructions
-1. Rename your `steamcmd.exe` to `steamcmd-original.exe`.
-2. Paste the `steamcmd.exe` from this project in its place so that it gets used instead.
-
-Backups will be timestamped zips.
+1. Paste `SteamCmdWrapper.exe` into your steamcmd folder.
+2. Run it.
+3. It will move the contents into a subfolder named `core` and setup correct symlinks so that RimPy is still happy.
+4. When you perform a download/update operation with RimPy it will trigger this wrapper instead and backups will be created as timestamped zips!
