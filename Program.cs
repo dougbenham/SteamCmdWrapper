@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace SteamCmdWrapper
 {
     internal class Program
     {
-	    private const string RequiredArg = "+force_install_dir downloader_helper";
-	    private const string Core = "core";
+	    private static readonly Regex _scriptArgRegex = new(@"\+runscript ""(.+)""");
+	    private static readonly Regex _forceInstallDirRegex = new(@"force_install_dir ""(.+)""");
+        private const string Core = "core";
 	    private const string SteamCmd = "steamcmd.exe";
-	    private const string Download = "downloader_helper";
 
 	    static void MoveDirectory(string sourceDir, string destinationDir)
 	    {
@@ -50,26 +51,44 @@ namespace SteamCmdWrapper
 
 					MoveDirectory(processDirectory, $@"{processDirectory}\{Core}");
 
-					new DirectoryInfo($@"{processDirectory}\{Download}").CreateAsSymbolicLink($@"{Core}\{Download}");
-
 			        File.Move($"{processDirectory}\\{Core}\\{processFileName}", $"{processDirectory}\\{SteamCmd}");
 			        return;
 		        }
 				else if (!File.Exists($"{processDirectory}\\{Core}\\{SteamCmd}"))
 			        throw new Exception($@"Invalid state, running process is {SteamCmd} but original {SteamCmd} was not found in \{Core}\ subfolder");
-				
-		        if (args.All(s => s != RequiredArg))
-		        {
-			        throw new Exception($"Missing required argument (\"{RequiredArg}\")");
-		        }
 
-		        var contentDir = $@"{processDirectory}\{Download}\steamapps\workshop\content";
+                Match? scriptMatch = null;
+                foreach (var arg in args)
+                {
+	                scriptMatch = _scriptArgRegex.Match(arg);
+	                if (scriptMatch.Success)
+		                break;
+                }
+                if (scriptMatch == null)
+	                throw new Exception($"Missing required argument (\"{_scriptArgRegex}\")");
+
+                var scriptPath = scriptMatch.Groups[1].Value;
+                if (!File.Exists(scriptPath))
+                    throw new Exception($"Script file not found: {scriptPath}");
+                var script = File.ReadAllLines(scriptPath);
+				
+                Match? forceInstallDirMatch = null;
+                foreach (var arg in script)
+                {
+	                forceInstallDirMatch = _forceInstallDirRegex.Match(arg);
+	                if (forceInstallDirMatch.Success)
+		                break;
+                }
+                if (forceInstallDirMatch == null)
+	                throw new Exception($"Missing required script arg (\"{_forceInstallDirRegex}\")");
+
+                var contentDir = $@"{scriptMatch.Groups[1].Value}\steamapps\workshop\content";
 		        var datetime = $"Backup-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}";
 				var appIds = new HashSet<string>();
 
-		        foreach (var arg in args)
+		        foreach (var arg in script)
 		        {
-			        if (arg.StartsWith("+workshop_download_item "))
+			        if (arg.StartsWith("workshop_download_item "))
 			        {
 				        var split = arg.Split(' ');
 				        var appId = split[1];
