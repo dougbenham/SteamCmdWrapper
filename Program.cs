@@ -82,13 +82,13 @@ namespace SteamCmdWrapper
                 if (forceInstallDirMatch == null)
 	                throw new Exception($"Missing required script arg (\"{_forceInstallDirRegex}\")");
 
-                var contentDir = $@"{scriptMatch.Groups[1].Value}\steamapps\workshop\content";
+                var contentDir = $@"{forceInstallDirMatch.Groups[1].Value}\steamapps\workshop\content";
 		        var datetime = $"Backup-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}";
 				var appIds = new HashSet<string>();
 
 		        foreach (var arg in script)
 		        {
-			        if (arg.StartsWith("workshop_download_item "))
+                    if (arg.StartsWith("workshop_download_item "))
 			        {
 				        var split = arg.Split(' ');
 				        var appId = split[1];
@@ -117,7 +117,7 @@ namespace SteamCmdWrapper
 			        ZipFile.CreateFromDirectory($@"{appDir}\{datetime}", $@"{appDir}\{datetime}.zip", CompressionLevel.Optimal, false);
 			        Directory.Delete($@"{appDir}\{datetime}", true);
 		        }
-
+				
 		        var process = Process.Start($@"{processDirectory}\{Core}\{SteamCmd}", args);
 		        process.WaitForExit();
 
