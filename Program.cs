@@ -85,6 +85,7 @@ namespace SteamCmdWrapper
                 var contentDir = $@"{forceInstallDirMatch.Groups[1].Value}\steamapps\workshop\content";
 		        var datetime = $"Backup-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}";
 				var appIds = new HashSet<string>();
+				var tempDir = Path.GetTempPath();
 
 		        foreach (var arg in script)
 		        {
@@ -99,10 +100,10 @@ namespace SteamCmdWrapper
 				        {
 					        Console.WriteLine($@"Backing up {appId}\{itemId}..");
 
-					        if (!Directory.Exists($@"{appDir}\{datetime}"))
-						        Directory.CreateDirectory($@"{appDir}\{datetime}");
+					        if (!Directory.Exists($@"{tempDir}\{datetime}"))
+						        Directory.CreateDirectory($@"{tempDir}\{datetime}");
 
-							Directory.Move(itemDir, $@"{appDir}\{datetime}\{itemId}");
+							Directory.Move(itemDir, $@"{tempDir}\{datetime}\{itemId}");
 
 							appIds.Add(appId);
 				        }
@@ -114,8 +115,8 @@ namespace SteamCmdWrapper
 			        Console.WriteLine($"Zipping backed up items for {appId} to {datetime}.zip..");
 
 			        var appDir = $@"{contentDir}\{appId}";
-			        ZipFile.CreateFromDirectory($@"{appDir}\{datetime}", $@"{appDir}\{datetime}.zip", CompressionLevel.Optimal, false);
-			        Directory.Delete($@"{appDir}\{datetime}", true);
+			        ZipFile.CreateFromDirectory($@"{tempDir}\{datetime}", $@"{appDir}\{datetime}.zip", CompressionLevel.Optimal, false);
+			        Directory.Delete($@"{tempDir}\{datetime}", true);
 		        }
 				
 		        var process = Process.Start($@"{processDirectory}\{Core}\{SteamCmd}", args);
